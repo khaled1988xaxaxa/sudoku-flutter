@@ -1,0 +1,31 @@
+name: sudoku_flutter
+description: A beautiful Sudoku game with kids mode built in Flutter
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '^3.8.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+  cupertino_icons: ^1.0.2
+  flutter_staggered_animations: ^1.1.1
+  lottie: ^2.7.0
+  confetti: ^0.7.0
+  intl: ^0.20.2
+  path_provider: ^2.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

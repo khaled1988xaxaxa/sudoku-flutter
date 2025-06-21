@@ -1,0 +1,11 @@
+include: package:flutter_lints/flutter.yaml
+
+# Additional rules can be added here
+linter:
+  rules:
+    # Avoid relative imports for files in lib/
+    avoid_relative_lib_imports: true
+    # Prefer const constructors
+    prefer_const_constructors: true
+    # Use key in widget constructors
+    use_key_in_widget_constructors: true
