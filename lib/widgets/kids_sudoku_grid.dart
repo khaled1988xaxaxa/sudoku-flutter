@@ -24,6 +24,8 @@ class KidsSudokuGrid extends StatelessWidget {
     final gridSize = grid.isNotEmpty ? grid.length : 4;
     final boxSize = (gridSize == 4) ? 2 : 3; // 2x2 boxes for 4x4 grid, 3x3 boxes for 9x9
 
+    print("KidsSudokuGrid build: gridSize=$gridSize, isGameActive=$isGameActive, grid.isEmpty=${grid.isEmpty}");
+
     return AspectRatio(
       aspectRatio: 1.0,
       child: Container(
@@ -42,38 +44,24 @@ class KidsSudokuGrid extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              // The main grid
-              GridView.builder(
-                padding: const EdgeInsets.all(8),
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: gridSize,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: 1,
-                  mainAxisSpacing: 1,
-                ),
-                itemCount: gridSize * gridSize,
-                itemBuilder: (context, index) {
-                  final row = index ~/ gridSize;
-                  final col = index % gridSize;
-                  return _buildKidsCell(context, row, col, gridSize, boxSize);
-                },
-              ),
-              // Overlay thick borders for box divisions
-              _buildBoxBorders(gridSize, boxSize),
-            ],
+          child: GridView.builder(
+            padding: const EdgeInsets.all(8),
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: gridSize,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 1,
+              mainAxisSpacing: 1,
+            ),
+            itemCount: gridSize * gridSize,
+            itemBuilder: (context, index) {
+              final row = index ~/ gridSize;
+              final col = index % gridSize;
+              return _buildKidsCell(context, row, col, gridSize, boxSize);
+            },
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBoxBorders(int gridSize, int boxSize) {
-    return CustomPaint(
-      size: Size.infinite,
-      painter: BoxBorderPainter(gridSize: gridSize, boxSize: boxSize),
     );
   }
 
@@ -104,98 +92,69 @@ class KidsSudokuGrid extends StatelessWidget {
       backgroundColor = Colors.white;
     }
 
-    return GestureDetector(
-      onTap: isGameActive ? () => onCellTap(row, col) : null,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          border: Border.all(
-            color: Colors.grey.shade300, // Thin gray borders for all cells
-            width: 0.5,
+    return Material(
+      color: backgroundColor,
+      child: InkWell(
+        onTap: () {
+          print("Cell tap detected: row=$row, col=$col, isGameActive=$isGameActive");
+          if (isGameActive) {
+            print("Calling onCellTap callback");
+            onCellTap(row, col);
+          } else {
+            print("Game not active, ignoring tap");
+          }
+        },
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.grey.shade400, // Slightly darker borders
+              width: 1.0,
+            ),
+            boxShadow: isSelected ? [
+              BoxShadow(
+                color: Colors.orange.withOpacity(0.5),
+                blurRadius: 6,
+                spreadRadius: 2,
+              )
+            ] : null,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: Colors.orange.withOpacity(0.3),
-              blurRadius: 4,
-              spreadRadius: 1,
-            )
-          ] : null,
-        ),
-        child: Center(
-          child: cell.value != 0
-              ? SudokuNumberText(
-                  number: cell.value,
-                  style: TextStyle(
-                    fontSize: gridSize == 4
-                        ? 36  // Larger font for 4x4 grid
-                        : 22, // Good size font for 9x9 grid
-                    fontWeight: FontWeight.bold,
-                    color: cell.isOriginal 
-                        ? const Color(0xFF5E35B1)  // Deep purple for given numbers
-                        : const Color(0xFF4CAF50),  // Green for user input
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.2),
-                        offset: const Offset(1, 1),
-                        blurRadius: 1,
+          child: Center(
+            child: cell.value != 0
+                ? SudokuNumberText(
+                    number: cell.value,
+                    style: TextStyle(
+                      fontSize: gridSize == 4
+                          ? 36  // Larger font for 4x4 grid
+                          : 22, // Good size font for 9x9 grid
+                      fontWeight: FontWeight.bold,
+                      color: cell.isOriginal 
+                          ? const Color(0xFF5E35B1)  // Deep purple for given numbers
+                          : const Color(0xFF4CAF50),  // Green for user input
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.2),
+                          offset: const Offset(1, 1),
+                          blurRadius: 1,
+                        ),
+                      ],
+                    ),
+                  )
+                : isSelected
+                    ? Icon(
+                        Icons.add_circle_outline,
+                        color: Colors.orange,
+                        size: gridSize == 4 ? 30 : 20,
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Colors.transparent,
                       ),
-                    ],
-                  ),
-                )
-              : isSelected
-                  ? Icon(
-                      Icons.add_circle_outline,
-                      color: Colors.orange,
-                      size: gridSize == 4 ? 30 : 20,
-                    )
-                  : null,
+          ),
         ),
       ),
     );
-  }
-}
-
-class BoxBorderPainter extends CustomPainter {
-  final int gridSize;
-  final int boxSize;
-
-  BoxBorderPainter({
-    required this.gridSize,
-    required this.boxSize,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.deepPurple
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0;
-
-    // Draw vertical lines
-    for (int i = 1; i < gridSize; i++) {
-      if (i % boxSize == 0) {
-        canvas.drawLine(
-          Offset(i * size.width / gridSize, 0),
-          Offset(i * size.width / gridSize, size.height),
-          paint,
-        );
-      }
-    }
-
-    // Draw horizontal lines
-    for (int i = 1; i < gridSize; i++) {
-      if (i % boxSize == 0) {
-        canvas.drawLine(
-          Offset(0, i * size.height / gridSize),
-          Offset(size.width, i * size.height / gridSize),
-          paint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

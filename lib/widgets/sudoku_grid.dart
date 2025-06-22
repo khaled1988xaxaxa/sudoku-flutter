@@ -23,20 +23,21 @@ class SudokuGrid extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1.0,
       child: Container(
-        margin: const EdgeInsets.all(4), // Add margin to make grid more prominent
+        margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.black, width: 3), // Slightly thicker border
-          borderRadius: BorderRadius.circular(12), // Increased border radius
+          color: Colors.white,
+          border: Border.all(color: Colors.black, width: 2), // Thinner black border
+          borderRadius: BorderRadius.circular(8), // Smaller border radius to match image
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(6),
           child: Column(
             children: List.generate(9, (row) {
               return Expanded(
@@ -60,18 +61,22 @@ class SudokuGrid extends StatelessWidget {
     final isSelected = selectedRow == row && selectedCol == col;
     final isHighlighted = cell.isHighlighted;
     final isError = cell.isError;
+    final isConflict = cell.isConflict;
 
+    // Updated colors to match the screenshot exactly
     Color backgroundColor;
     if (isSelected) {
-      backgroundColor = Theme.of(context).primaryColor.withOpacity(0.5);
+      backgroundColor = const Color(0xFFFFFFC0); // Pale yellow from screenshot
     } else if (isError) {
       backgroundColor = Colors.red.withOpacity(0.3);
+    } else if (isConflict) {
+      backgroundColor = Colors.orange.withOpacity(0.3); // Highlight conflicting cells
     } else if (isHighlighted) {
-      backgroundColor = Theme.of(context).primaryColor.withOpacity(0.1);
+      backgroundColor = const Color(0xFFD6EAF8); // Light blue from screenshot
     } else if (cell.isOriginal) {
-      backgroundColor = Colors.grey.withOpacity(0.1);
+      backgroundColor = const Color(0xFFF0F0F0); // Light gray for prefilled cells
     } else {
-      backgroundColor = Colors.transparent;
+      backgroundColor = Colors.white;
     }
 
     return GestureDetector(
@@ -81,12 +86,12 @@ class SudokuGrid extends StatelessWidget {
           color: backgroundColor,
           border: Border(
             right: BorderSide(
-              color: (col + 1) % 3 == 0 ? Colors.black : Colors.grey,
-              width: (col + 1) % 3 == 0 ? 2 : 0.5,
+              color: (col + 1) % 3 == 0 ? Colors.black : Colors.grey.shade300,
+              width: (col + 1) % 3 == 0 ? 2 : 0.8,
             ),
             bottom: BorderSide(
-              color: (row + 1) % 3 == 0 ? Colors.black : Colors.grey,
-              width: (row + 1) % 3 == 0 ? 2 : 0.5,
+              color: (row + 1) % 3 == 0 ? Colors.black : Colors.grey.shade300,
+              width: (row + 1) % 3 == 0 ? 2 : 0.8,
             ),
           ),
         ),
@@ -97,9 +102,11 @@ class SudokuGrid extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: cell.isOriginal ? FontWeight.bold : FontWeight.normal,
-                    color: cell.isOriginal 
-                        ? Colors.black 
-                        : Theme.of(context).primaryColor,
+                    color: isConflict 
+                        ? Colors.red  // Red text for conflicting cells
+                        : cell.isOriginal 
+                            ? Colors.black 
+                            : Theme.of(context).primaryColor,
                   ),
                 )
               : cell.notes.isNotEmpty

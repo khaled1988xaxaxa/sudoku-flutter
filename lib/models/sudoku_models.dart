@@ -4,6 +4,7 @@ class SudokuCell {
   Set<int> notes;
   bool isHighlighted;
   bool isError;
+  bool isConflict;
 
   SudokuCell({
     this.value = 0,
@@ -11,6 +12,7 @@ class SudokuCell {
     Set<int>? notes,
     this.isHighlighted = false,
     this.isError = false,
+    this.isConflict = false,
   }) : notes = notes ?? <int>{};
 
   SudokuCell copy() {
@@ -20,6 +22,7 @@ class SudokuCell {
       notes: Set<int>.from(notes),
       isHighlighted: isHighlighted,
       isError: isError,
+      isConflict: isConflict,
     );
   }
 

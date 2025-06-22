@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/sudoku_models.dart';
 
 class GameControls extends StatelessWidget {
   final bool canUndo;
@@ -9,6 +10,8 @@ class GameControls extends StatelessWidget {
   final VoidCallback onToggleNotes;
   final VoidCallback onHint;
   final VoidCallback onClear;
+  final bool areHintsAvailable;
+  final Difficulty difficulty;
 
   const GameControls({
     super.key,
@@ -20,10 +23,15 @@ class GameControls extends StatelessWidget {
     required this.onToggleNotes,
     required this.onHint,
     required this.onClear,
+    this.areHintsAvailable = true,
+    required this.difficulty,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Check if hints are available based on difficulty
+    final bool hintsEnabled = difficulty != Difficulty.expert;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -51,8 +59,9 @@ class GameControls extends StatelessWidget {
           _buildControlButton(
             context,
             icon: Icons.lightbulb,
-            label: 'Hint',
-            onPressed: onHint,
+            label: hintsEnabled ? 'Hint' : 'No Hints',
+            onPressed: hintsEnabled ? onHint : null,
+            isDisabled: !hintsEnabled,
           ),
           _buildControlButton(
             context,
@@ -71,6 +80,7 @@ class GameControls extends StatelessWidget {
     required String label,
     required VoidCallback? onPressed,
     bool isActive = false,
+    bool isDisabled = false,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -82,14 +92,18 @@ class GameControls extends StatelessWidget {
             backgroundColor: isActive 
                 ? Theme.of(context).primaryColor.withOpacity(0.2)
                 : null,
-            foregroundColor: isActive 
-                ? Theme.of(context).primaryColor
-                : null,
+            foregroundColor: isDisabled
+                ? Colors.grey
+                : isActive 
+                    ? Theme.of(context).primaryColor
+                    : null,
           ),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: isDisabled ? Colors.grey : null,
+          ),
         ),
       ],
     );

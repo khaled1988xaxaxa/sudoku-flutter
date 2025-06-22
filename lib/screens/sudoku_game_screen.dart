@@ -113,6 +113,8 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                   statsProvider.recordHintUsed();
                 },
                 onClear: sudokuProvider.clearCell,
+                areHintsAvailable: sudokuProvider.areHintsAvailable,
+                difficulty: difficulty,
               ),
 
               // Number Pad

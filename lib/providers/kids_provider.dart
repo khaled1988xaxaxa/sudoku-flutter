@@ -60,6 +60,8 @@ class KidsProvider extends ChangeNotifier {
     _grid = _generateKidsPuzzle(difficulty);
 
     _originalGrid = _deepCopyGrid(_grid);
+    
+    // Ensure game is active BEFORE other initialization
     _isGameActive = true;
     _isGameComplete = false;
     _selectedRow = -1;
@@ -68,32 +70,59 @@ class KidsProvider extends ChangeNotifier {
     _hintsRemaining = difficulty == Difficulty.kidsBeginner ? 5 : 3;
     _elapsedSeconds = 0;
     _encouragementMessage = _getRandomEncouragement();
+    
     _startTimer();
+    
+    // Debug logging to verify game state
+    print("Kids game started - isGameActive: $_isGameActive, grid size: ${_grid.length}x${_grid.isNotEmpty ? _grid[0].length : 0}");
+    
     notifyListeners();
   }
 
   void selectKidsCell(int row, int col) {
-    if (!_isGameActive || _isGameComplete) return;
+    print("selectKidsCell called: row=$row, col=$col, isGameActive=$_isGameActive, isGameComplete=$_isGameComplete");
+    
+    if (!_isGameActive || _isGameComplete) {
+      print("Cannot select cell - game not active or complete");
+      return;
+    }
+    
+    // Validate row and col are within bounds
+    if (row < 0 || row >= _grid.length || col < 0 || col >= _grid[0].length) {
+      print("Cell selection out of bounds: row=$row, col=$col, grid size=${_grid.length}x${_grid.isNotEmpty ? _grid[0].length : 0}");
+      return;
+    }
     
     _clearHighlights();
     _selectedRow = row;
     _selectedCol = col;
     _highlightKidsRelatedCells(row, col);
+    
+    print("Cell selected successfully: row=$_selectedRow, col=$_selectedCol");
     notifyListeners();
   }
 
   void inputKidsNumber(int number) {
-    if (!_isGameActive || _selectedRow == -1 || _selectedCol == -1) return;
+    if (!_isGameActive || _selectedRow == -1 || _selectedCol == -1) {
+      print("Cannot input number: game not active or no cell selected");
+      return;
+    }
     
     SudokuCell cell = _grid[_selectedRow][_selectedCol];
-    if (cell.isOriginal) return;
+    if (cell.isOriginal) {
+      print("Cannot modify original cell");
+      return;
+    }
 
+    // Place new number (even if same, this toggles it on/off)
     if (cell.value == number) {
       // Remove number if same number is placed
       cell.value = 0;
+      print("Removed number $number from cell [$_selectedRow,$_selectedCol]");
     } else {
       // Place new number
       cell.value = number;
+      print("Placed number $number in cell [$_selectedRow,$_selectedCol]");
       
       // Check if move is valid and give feedback
       if (_isValidKidsMove(_selectedRow, _selectedCol, number)) {
@@ -463,9 +492,13 @@ class KidsProvider extends ChangeNotifier {
     _hintsRemaining = _currentDifficulty == Difficulty.kidsBeginner ? 5 : 3;
     _elapsedSeconds = 0;
     _isGameComplete = false;
+    // Ensure game is active after reset
+    _isGameActive = true;
     _encouragementMessage = _getRandomEncouragement();
     _clearHighlights();
     _startTimer();
+    
+    print("Kids game reset - isGameActive: $_isGameActive");
     notifyListeners();
   }
 

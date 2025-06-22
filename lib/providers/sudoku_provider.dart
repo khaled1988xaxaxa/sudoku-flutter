@@ -105,9 +105,15 @@ class SudokuProvider extends ChangeNotifier {
       if (!_isValidMove(_selectedRow, _selectedCol, number)) {
         _mistakes++;
         cell.isError = true;
-        // Remove error highlight after 1 second
-        Timer(const Duration(seconds: 1), () {
+        
+        // Show which specific cells conflict with this number
+        _highlightConflictingCells(_selectedRow, _selectedCol, number);
+        
+        // Remove error highlight after 1.5 seconds
+        Timer(const Duration(milliseconds: 1500), () {
           cell.isError = false;
+          _clearConflictHighlights();
+          _highlightRelatedCells(_selectedRow, _selectedCol);
           notifyListeners();
         });
       }
@@ -193,6 +199,12 @@ class SudokuProvider extends ChangeNotifier {
   void getHint() {
     if (!_isGameActive || _isGameComplete) return;
     
+    // Disable hints in expert mode
+    if (_currentDifficulty == Difficulty.expert) {
+      // Don't provide hints in expert mode
+      return;
+    }
+    
     // Find an empty cell with the fewest possibilities
     int bestRow = -1, bestCol = -1;
     int fewestOptions = 10;
@@ -219,6 +231,9 @@ class SudokuProvider extends ChangeNotifier {
       }
     }
   }
+
+  // Helper method to check if hints are available for current difficulty
+  bool get areHintsAvailable => _currentDifficulty != Difficulty.expert;
 
   void toggleNoteMode() {
     _noteMode = !_noteMode;
@@ -414,6 +429,52 @@ class SudokuProvider extends ChangeNotifier {
     
     // Don't highlight the selected cell itself
     _grid[selectedRow][selectedCol].isHighlighted = false;
+  }
+
+  // Highlight cells that conflict with the entered number
+  void _highlightConflictingCells(int row, int col, int number) {
+    // We'll mark conflicting cells with a different property
+    for (int r = 0; r < 9; r++) {
+      for (int c = 0; c < 9; c++) {
+        _grid[r][c].isConflict = false;
+      }
+    }
+    
+    // Check row conflicts
+    for (int c = 0; c < 9; c++) {
+      if (c != col && _grid[row][c].value == number) {
+        _grid[row][c].isConflict = true;
+      }
+    }
+    
+    // Check column conflicts
+    for (int r = 0; r < 9; r++) {
+      if (r != row && _grid[r][col].value == number) {
+        _grid[r][col].isConflict = true;
+      }
+    }
+    
+    // Check 3x3 box conflicts
+    int boxRow = (row ~/ 3) * 3;
+    int boxCol = (col ~/ 3) * 3;
+    for (int r = boxRow; r < boxRow + 3; r++) {
+      for (int c = boxCol; c < boxCol + 3; c++) {
+        if ((r != row || c != col) && _grid[r][c].value == number) {
+          _grid[r][c].isConflict = true;
+        }
+      }
+    }
+    
+    notifyListeners();
+  }
+  
+  // Clear conflict highlights
+  void _clearConflictHighlights() {
+    for (int row = 0; row < 9; row++) {
+      for (int col = 0; col < 9; col++) {
+        _grid[row][col].isConflict = false;
+      }
+    }
   }
 
   List<List<SudokuCell>> _deepCopyGrid(List<List<SudokuCell>> original) {
