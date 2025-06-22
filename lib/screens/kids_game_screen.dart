@@ -78,7 +78,7 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
                   child: Column(
                     children: [
                       _buildKidsHeader(context, kidsProvider),
-                      _buildEncouragementMessage(context, kidsProvider),
+                      // Remove the encouragement message from here to prevent layout shifts
                       _buildKidsInfoBar(context, kidsProvider),
                       Expanded(
                         flex: 5, // Increased from 3 to 5 for much larger grid
@@ -106,6 +106,37 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
                     ],
                   ),
                 ),
+                // Encouragement message as overlay - positioned at top, doesn't affect layout
+                if (kidsProvider.encouragementMessage.isNotEmpty)
+                  Positioned(
+                    top: 100, // Position below the header
+                    left: 16,
+                    right: 16,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.95),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        kidsProvider.encouragementMessage,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2D3748),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 // Confetti overlay
                 Align(
                   alignment: Alignment.topCenter,
@@ -156,35 +187,6 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
             icon: const Icon(Icons.refresh, color: Colors.white, size: 28),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEncouragementMessage(BuildContext context, KidsProvider provider) {
-    if (provider.encouragementMessage.isEmpty) return const SizedBox.shrink();
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        provider.encouragementMessage,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF2D3748),
-        ),
-        textAlign: TextAlign.center,
       ),
     );
   }
