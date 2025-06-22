@@ -331,7 +331,6 @@ class SudokuProvider extends ChangeNotifier {
               time: formattedTime,
               hintsUsed: _hintsUsed,
               mistakes: _mistakes,
-              score: score,
               onPlayAgain: () {
                 Navigator.of(context).pop();
                 startNewGame(_currentDifficulty);

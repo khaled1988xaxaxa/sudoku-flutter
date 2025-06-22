@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// A specialized widget for displaying Sudoku numbers correctly
-/// Uses direct Unicode code points to avoid font fallback issues
+/// Always uses Western Arabic numerals (0-9) regardless of locale
 class SudokuNumberText extends StatelessWidget {
   final int number;
   final TextStyle? style;
@@ -14,58 +14,21 @@ class SudokuNumberText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use direct Unicode code points for digits to avoid font mapping issues
-    String displayText;
-    switch (number) {
-      case 1:
-        displayText = '\u0031';
-        break; // Unicode for '1'
-      case 2:
-        displayText = '\u0032';
-        break; // Unicode for '2'
-      case 3:
-        displayText = '\u0033';
-        break; // Unicode for '3'
-      case 4:
-        displayText = '\u0034';
-        break; // Unicode for '4'
-      case 5:
-        displayText = '\u0035';
-        break; // Unicode for '5'
-      case 6:
-        displayText = '\u0036';
-        break; // Unicode for '6'
-      case 7:
-        displayText = '\u0037';
-        break; // Unicode for '7'
-      case 8:
-        displayText = '\u0038';
-        break; // Unicode for '8'
-      case 9:
-        displayText = '\u0039';
-        break; // Unicode for '9'
-      default:
-        displayText = String.fromCharCode(48 + number);
-        break; // ASCII digits
-    }
-
+    // Always use standard Western Arabic numerals
     return Text(
-      displayText,
+      number.toString(),
       style: (style ?? const TextStyle()).copyWith(
-        fontFamily: 'monospace',
+        fontFamily: 'Roboto',
         fontFamilyFallback: const [
-          'SF Pro Text', // iOS system font
-          'Segoe UI', // Windows system font
-          'Roboto', // Android system font
-          'Arial', // Universal fallback
-          'Helvetica', // Mac fallback
-          'sans-serif', // Generic fallback
+          'Arial',
+          'Helvetica',
+          'sans-serif',
         ],
-        fontFeatures: const [
-          FontFeature.tabularFigures(), // Ensure consistent digit spacing
-          FontFeature.liningFigures(), // Use lining figures for numbers
-        ],
+        // Force the use of Western Arabic numerals
+        locale: const Locale('en', 'US'),
       ),
+      // Ensure text direction is left-to-right for numbers
+      textDirection: TextDirection.ltr,
     );
   }
 }
@@ -288,4 +251,238 @@ class SafeText extends StatelessWidget {
       overflow: overflow,
     );
   }
+}
+
+/// A bulletproof widget for displaying Sudoku numbers in Western format
+/// This completely bypasses any locale-based number formatting
+class ForceWesternNumberText extends StatelessWidget {
+  final int number;
+  final TextStyle? style;
+
+  const ForceWesternNumberText({
+    Key? key,
+    required this.number,
+    this.style,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Map numbers to explicit Western characters to bypass any locale formatting
+    const Map<int, String> westernNumbers = {
+      0: '0',
+      1: '1',
+      2: '2',
+      3: '3',
+      4: '4',
+      5: '5',
+      6: '6',
+      7: '7',
+      8: '8',
+      9: '9',
+    };
+
+    return Localizations.override(
+      context: context,
+      locale: const Locale('en', 'US'),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text(
+          westernNumbers[number] ?? number.toString(),
+          style: (style ?? const TextStyle()).copyWith(
+            fontFamily: 'Roboto',
+            fontFamilyFallback: const ['Arial', 'Helvetica', 'sans-serif'],
+          ),
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+  }
+}
+
+/// A widget that draws numbers using custom painting to avoid any font/locale issues
+class PaintedNumberWidget extends StatelessWidget {
+  final int number;
+  final Color color;
+  final double size;
+  final FontWeight fontWeight;
+
+  const PaintedNumberWidget({
+    Key? key,
+    required this.number,
+    this.color = Colors.black,
+    this.size = 16.0,
+    this.fontWeight = FontWeight.normal,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: NumberCustomPainter(
+        number: number,
+        color: color,
+        size: size,
+        fontWeight: fontWeight,
+      ),
+    );
+  }
+}
+
+/// Custom painter that draws numbers using paths to completely avoid text rendering
+class NumberCustomPainter extends CustomPainter {
+  final int number;
+  final Color color;
+  final double size;
+  final FontWeight fontWeight;
+
+  NumberCustomPainter({
+    required this.number,
+    required this.color,
+    required this.size,
+    required this.fontWeight,
+  });
+
+  @override
+  void paint(Canvas canvas, Size canvasSize) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = fontWeight == FontWeight.bold ? 2.5 : 1.8
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final fillPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final center = Offset(canvasSize.width / 2, canvasSize.height / 2);
+    final scale = size / 20;
+
+    switch (number) {
+      case 1:
+        _draw1(canvas, center, scale, paint);
+        break;
+      case 2:
+        _draw2(canvas, center, scale, paint);
+        break;
+      case 3:
+        _draw3(canvas, center, scale, paint);
+        break;
+      case 4:
+        _draw4(canvas, center, scale, paint);
+        break;
+      case 5:
+        _draw5(canvas, center, scale, paint);
+        break;
+      case 6:
+        _draw6(canvas, center, scale, paint);
+        break;
+      case 7:
+        _draw7(canvas, center, scale, paint);
+        break;
+      case 8:
+        _draw8(canvas, center, scale, paint);
+        break;
+      case 9:
+        _draw9(canvas, center, scale, paint);
+        break;
+    }
+  }
+
+  void _draw1(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx, center.dy - 8 * scale);
+    path.lineTo(center.dx, center.dy + 8 * scale);
+    path.moveTo(center.dx - 3 * scale, center.dy - 6 * scale);
+    path.lineTo(center.dx, center.dy - 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw2(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx - 6 * scale, center.dy - 4 * scale);
+    path.quadraticBezierTo(center.dx - 6 * scale, center.dy - 8 * scale, center.dx, center.dy - 8 * scale);
+    path.quadraticBezierTo(center.dx + 6 * scale, center.dy - 8 * scale, center.dx + 6 * scale, center.dy - 4 * scale);
+    path.quadraticBezierTo(center.dx + 6 * scale, center.dy, center.dx, center.dy);
+    path.lineTo(center.dx - 6 * scale, center.dy + 8 * scale);
+    path.lineTo(center.dx + 6 * scale, center.dy + 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw3(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx - 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx + 6 * scale, center.dy - 8 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy - 8 * scale, center.dx + 8 * scale, center.dy - 4 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy, center.dx + 4 * scale, center.dy);
+    path.lineTo(center.dx + 6 * scale, center.dy);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy, center.dx + 8 * scale, center.dy + 4 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy + 8 * scale, center.dx + 6 * scale, center.dy + 8 * scale);
+    path.lineTo(center.dx - 6 * scale, center.dy + 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw4(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx - 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx - 6 * scale, center.dy + 2 * scale);
+    path.lineTo(center.dx + 6 * scale, center.dy + 2 * scale);
+    path.moveTo(center.dx + 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx + 6 * scale, center.dy + 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw5(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx + 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx - 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx - 6 * scale, center.dy);
+    path.lineTo(center.dx + 4 * scale, center.dy);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy, center.dx + 8 * scale, center.dy + 4 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy + 8 * scale, center.dx + 4 * scale, center.dy + 8 * scale);
+    path.lineTo(center.dx - 6 * scale, center.dy + 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw6(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx + 4 * scale, center.dy - 8 * scale);
+    path.quadraticBezierTo(center.dx - 8 * scale, center.dy - 8 * scale, center.dx - 8 * scale, center.dy);
+    path.quadraticBezierTo(center.dx - 8 * scale, center.dy + 8 * scale, center.dx + 4 * scale, center.dy + 8 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy + 8 * scale, center.dx + 8 * scale, center.dy + 4 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy, center.dx + 4 * scale, center.dy);
+    path.lineTo(center.dx - 8 * scale, center.dy);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw7(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx - 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx + 6 * scale, center.dy - 8 * scale);
+    path.lineTo(center.dx + 2 * scale, center.dy + 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  void _draw8(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path1 = Path();
+    path1.addOval(Rect.fromCenter(center: Offset(center.dx, center.dy - 4 * scale), width: 12 * scale, height: 6 * scale));
+    final path2 = Path();
+    path2.addOval(Rect.fromCenter(center: Offset(center.dx, center.dy + 4 * scale), width: 12 * scale, height: 6 * scale));
+    canvas.drawPath(path1, paint);
+    canvas.drawPath(path2, paint);
+  }
+
+  void _draw9(Canvas canvas, Offset center, double scale, Paint paint) {
+    final path = Path();
+    path.moveTo(center.dx + 8 * scale, center.dy);
+    path.lineTo(center.dx - 4 * scale, center.dy);
+    path.quadraticBezierTo(center.dx - 8 * scale, center.dy, center.dx - 8 * scale, center.dy - 4 * scale);
+    path.quadraticBezierTo(center.dx - 8 * scale, center.dy - 8 * scale, center.dx - 4 * scale, center.dy - 8 * scale);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy - 8 * scale, center.dx + 8 * scale, center.dy);
+    path.quadraticBezierTo(center.dx + 8 * scale, center.dy + 8 * scale, center.dx - 4 * scale, center.dy + 8 * scale);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

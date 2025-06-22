@@ -4,47 +4,46 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../providers/theme_provider.dart';
 import '../providers/statistics_provider.dart';
 import '../models/sudoku_models.dart';
-import '../utils/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class CustomHomeScreen extends StatelessWidget {
   const CustomHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        return Theme(
-          data: themeProvider.isKidsMode ? AppTheme.kidsTheme : Theme.of(context),
-          child: Scaffold(
-            body: Container(
-              decoration: themeProvider.isKidsMode
-                  ? const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFFFF6B6B),
-                          Color(0xFF4ECDC4),
-                          Color(0xFFFFEB3B),
-                          Color(0xFF4CAF50),
-                        ],
-                      ),
-                    )
-                  : null,
-              child: SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      _buildHeader(context, themeProvider),
-                      const SizedBox(height: 30),
-                      _buildQuickStats(context),
-                      const SizedBox(height: 30),
-                      _buildGameModes(context, themeProvider),
-                      const SizedBox(height: 30),
-                      _buildQuickActions(context, themeProvider),
-                    ],
-                  ),
+        return Scaffold(
+          body: Container(
+            decoration: themeProvider.isKidsMode
+                ? const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFFF6B6B),
+                        Color(0xFF4ECDC4),
+                        Color(0xFFFFEB3B),
+                        Color(0xFF4CAF50),
+                      ],
+                    ),
+                  )
+                : null,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    _buildHeader(context, themeProvider, l10n),
+                    const SizedBox(height: 30),
+                    _buildQuickStats(context, l10n),
+                    const SizedBox(height: 30),
+                    _buildGameModes(context, themeProvider, l10n),
+                    const SizedBox(height: 30),
+                    _buildQuickActions(context, themeProvider, l10n),
+                  ],
                 ),
               ),
             ),
@@ -54,7 +53,7 @@ class CustomHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildHeader(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 0,
       duration: const Duration(milliseconds: 600),
@@ -69,30 +68,21 @@ class CustomHomeScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset(
-                        'assets/images/logo.png',
-                        width: 40,
-                        height: 40,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.sports_score,
-                            size: 40,
-                            color: Theme.of(context).primaryColor,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
                       Text(
-                        'Sudoku Master',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        themeProvider.isKidsMode ? l10n.kidsSudoku : l10n.sudokuMaster,
+                        style: TextStyle(
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
+                          color: themeProvider.isKidsMode ? Colors.white : null,
                           fontFamily: 'Roboto',
                         ),
                       ),
                       Text(
-                        'Challenge your mind',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        themeProvider.isKidsMode ? l10n.funPuzzles : l10n.challengeMind,
+                        style: TextStyle(
+                          fontSize: 16,
                           fontFamily: 'Roboto',
+                          color: themeProvider.isKidsMode ? Colors.white.withOpacity(0.9) : Colors.grey[600],
                         ),
                       ),
                     ],
@@ -110,7 +100,7 @@ class CustomHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickStats(BuildContext context) {
+  Widget _buildQuickStats(BuildContext context, AppLocalizations l10n) {
     return Consumer<StatisticsProvider>(
       builder: (context, stats, child) {
         return AnimationConfiguration.staggeredList(
@@ -128,21 +118,21 @@ class CustomHomeScreen extends StatelessWidget {
                       _buildStatItem(
                         context,
                         icon: Icons.emoji_events,
-                        label: 'Won',
+                        label: l10n.won,
                         value: stats.gamesWon.toString(),
                         color: Colors.amber,
                       ),
                       _buildStatItem(
                         context,
                         icon: Icons.local_fire_department,
-                        label: 'Streak',
+                        label: l10n.streak,
                         value: stats.currentStreak.toString(),
                         color: Colors.orange,
                       ),
                       _buildStatItem(
                         context,
                         icon: Icons.timer,
-                        label: 'Best',
+                        label: l10n.best,
                         value: stats.formattedBestTime,
                         color: Colors.blue,
                       ),
@@ -189,7 +179,7 @@ class CustomHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGameModes(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildGameModes(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 2,
       duration: const Duration(milliseconds: 600),
@@ -200,7 +190,7 @@ class CustomHomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose Your Challenge',
+                l10n.chooseChallenge,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -209,9 +199,9 @@ class CustomHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               if (themeProvider.isKidsMode)
-                _buildKidsGameModes(context)
+                _buildKidsGameModes(context, l10n)
               else
-                _buildRegularGameModes(context),
+                _buildRegularGameModes(context, l10n),
             ],
           ),
         ),
@@ -219,13 +209,13 @@ class CustomHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKidsGameModes(BuildContext context) {
+  Widget _buildKidsGameModes(BuildContext context, AppLocalizations l10n) {
     return Column(
       children: [
         _buildGameModeCard(
           context,
-          title: 'Kids Beginner',
-          subtitle: 'Perfect for first-time players',
+          title: l10n.kidsBeginner,
+          subtitle: l10n.perfectForFirstTime,
           difficulty: Difficulty.kidsBeginner,
           color: const Color(0xFF4CAF50),
           isKidsMode: true,
@@ -233,8 +223,8 @@ class CustomHomeScreen extends StatelessWidget {
         const SizedBox(height: 12),
         _buildGameModeCard(
           context,
-          title: 'Kids Easy',
-          subtitle: 'A bit more challenging',
+          title: l10n.kidsEasy,
+          subtitle: l10n.bitMoreChallenging,
           difficulty: Difficulty.kidsEasy,
           color: const Color(0xFF2196F3),
           isKidsMode: true,
@@ -243,7 +233,7 @@ class CustomHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRegularGameModes(BuildContext context) {
+  Widget _buildRegularGameModes(BuildContext context, AppLocalizations l10n) {
     return Column(
       children: [
         Row(
@@ -251,8 +241,8 @@ class CustomHomeScreen extends StatelessWidget {
             Expanded(
               child: _buildGameModeCard(
                 context,
-                title: 'Beginner',
-                subtitle: 'New to Sudoku?',
+                title: l10n.beginner,
+                subtitle: l10n.newToSudoku,
                 difficulty: Difficulty.beginner,
                 color: const Color(0xFF4CAF50),
               ),
@@ -261,8 +251,8 @@ class CustomHomeScreen extends StatelessWidget {
             Expanded(
               child: _buildGameModeCard(
                 context,
-                title: 'Easy',
-                subtitle: 'Gentle challenge',
+                title: l10n.easy,
+                subtitle: l10n.gentleChallenge,
                 difficulty: Difficulty.easy,
                 color: const Color(0xFF2196F3),
               ),
@@ -275,8 +265,8 @@ class CustomHomeScreen extends StatelessWidget {
             Expanded(
               child: _buildGameModeCard(
                 context,
-                title: 'Medium',
-                subtitle: 'Getting serious',
+                title: l10n.medium,
+                subtitle: l10n.gettingSerious,
                 difficulty: Difficulty.medium,
                 color: const Color(0xFFFFC107),
               ),
@@ -285,8 +275,8 @@ class CustomHomeScreen extends StatelessWidget {
             Expanded(
               child: _buildGameModeCard(
                 context,
-                title: 'Hard',
-                subtitle: 'Real challenge',
+                title: l10n.hard,
+                subtitle: l10n.realChallenge,
                 difficulty: Difficulty.hard,
                 color: const Color(0xFFFF9800),
               ),
@@ -296,8 +286,8 @@ class CustomHomeScreen extends StatelessWidget {
         const SizedBox(height: 12),
         _buildGameModeCard(
           context,
-          title: 'Expert',
-          subtitle: 'Only for masters',
+          title: l10n.expert,
+          subtitle: l10n.onlyForMasters,
           difficulty: Difficulty.expert,
           color: const Color(0xFFF44336),
         ),
@@ -382,7 +372,7 @@ class CustomHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildQuickActions(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 3,
       duration: const Duration(milliseconds: 600),
@@ -395,8 +385,8 @@ class CustomHomeScreen extends StatelessWidget {
                 child: _buildActionCard(
                   context,
                   icon: Icons.bar_chart,
-                  title: 'Statistics',
-                  subtitle: 'View your progress',
+                  title: l10n.statistics,
+                  subtitle: l10n.viewProgress,
                   onTap: () => Navigator.pushNamed(context, '/statistics'),
                 ),
               ),
@@ -405,8 +395,8 @@ class CustomHomeScreen extends StatelessWidget {
                 child: _buildActionCard(
                   context,
                   icon: themeProvider.isKidsMode ? Icons.person : Icons.child_care,
-                  title: themeProvider.isKidsMode ? 'Adult Mode' : 'Kids Mode',
-                  subtitle: themeProvider.isKidsMode ? 'Switch to adult' : 'Fun for kids',
+                  title: themeProvider.isKidsMode ? l10n.adultMode : l10n.kidsMode,
+                  subtitle: themeProvider.isKidsMode ? l10n.switchToAdult : l10n.funForKids,
                   onTap: () => themeProvider.toggleKidsMode(),
                 ),
               ),

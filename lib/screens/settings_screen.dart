@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/language_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
+    final l10n = AppLocalizations.of(context);
+    
+    return Consumer2<ThemeProvider, LanguageProvider>(
+      builder: (context, themeProvider, languageProvider, child) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('⚙️ Settings'),
+            title: Text('⚙️ ${l10n.settings}'),
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildThemeSection(context, themeProvider),
+              _buildLanguageSection(context, languageProvider, l10n),
               const SizedBox(height: 24),
-              _buildGameplaySection(context, themeProvider),
+              _buildThemeSection(context, themeProvider, l10n),
               const SizedBox(height: 24),
-              _buildAboutSection(context),
+              _buildGameplaySection(context, themeProvider, l10n),
+              const SizedBox(height: 24),
+              _buildAboutSection(context, l10n),
             ],
           ),
         );
@@ -28,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeSection(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildLanguageSection(BuildContext context, LanguageProvider languageProvider, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -36,15 +42,52 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Appearance',
+              l10n.language,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...languageProvider.supportedLanguages.map((language) {
+              final isSelected = languageProvider.currentLanguageCode == language['code'];
+              return RadioListTile<String>(
+                title: Text(language['name']!),
+                value: language['code']!,
+                groupValue: languageProvider.currentLanguageCode,
+                onChanged: (value) {
+                  if (value != null) {
+                    languageProvider.changeLanguage(value);
+                  }
+                },
+                secondary: Icon(
+                  Icons.language,
+                  color: isSelected ? Theme.of(context).primaryColor : null,
+                ),
+              );
+            }).toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeSection(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.appearance,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Dark Mode'),
-              subtitle: const Text('Use dark theme'),
+              title: Text(l10n.darkMode),
+              subtitle: Text(l10n.useTheme),
               value: themeProvider.isDarkMode,
               onChanged: (value) => themeProvider.toggleTheme(),
               secondary: Icon(
@@ -52,8 +95,8 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             SwitchListTile(
-              title: const Text('Kids Mode'),
-              subtitle: const Text('Switch to kid-friendly interface'),
+              title: Text(l10n.kidsMode),
+              subtitle: Text(l10n.switchToKidFriendly),
               value: themeProvider.isKidsMode,
               onChanged: (value) => themeProvider.setKidsMode(value),
               secondary: Icon(
@@ -66,7 +109,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGameplaySection(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildGameplaySection(BuildContext context, ThemeProvider themeProvider, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -74,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Gameplay',
+              l10n.gameplay,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -82,15 +125,15 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.help),
-              title: const Text('How to Play'),
-              subtitle: const Text('Learn Sudoku rules and tips'),
+              title: Text(l10n.howToPlay),
+              subtitle: Text(l10n.learnRules),
               trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () => _showHowToPlayDialog(context),
+              onTap: () => _showHowToPlayDialog(context, l10n),
             ),
             ListTile(
               leading: const Icon(Icons.bar_chart),
-              title: const Text('Statistics'),
-              subtitle: const Text('View your game statistics'),
+              title: Text(l10n.statistics),
+              subtitle: Text(l10n.viewProgress),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () => Navigator.pushNamed(context, '/statistics'),
             ),
@@ -100,7 +143,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutSection(BuildContext context) {
+  Widget _buildAboutSection(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -108,7 +151,7 @@ class SettingsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'About',
+              l10n.about,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -116,20 +159,20 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.info),
-              title: const Text('Version'),
+              title: Text(l10n.version),
               subtitle: const Text('1.0.0'),
             ),
             ListTile(
               leading: const Icon(Icons.code),
-              title: const Text('Developer Khaled almasri'),
-              subtitle: const Text('Built with Love ❤️'),
+              title: Text(l10n.developer),
+              subtitle: Text(l10n.builtWithLove),
             ),
             ListTile(
               leading: const Icon(Icons.favorite),
-              title: const Text('Rate Us'),
-              subtitle: const Text('Enjoying the game? Leave a review!'),
+              title: Text(l10n.rateUs),
+              subtitle: Text(l10n.enjoyingGame),
               trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () => _showRateDialog(context),
+              onTap: () => _showRateDialog(context, l10n),
             ),
           ],
         ),
@@ -137,43 +180,43 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showHowToPlayDialog(BuildContext context) {
+  void _showHowToPlayDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('🎯 How to Play Sudoku'),
+          title: Text(l10n.sudokuTitle),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Basic Rules:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.basicRules,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text('• Fill the 9×9 grid with numbers 1-9'),
-                const Text('• Each row must contain all numbers 1-9'),
-                const Text('• Each column must contain all numbers 1-9'),
-                const Text('• Each 3×3 box must contain all numbers 1-9'),
+                Text(l10n.fillGrid),
+                Text(l10n.eachRowNumbers),
+                Text(l10n.eachColumnNumbers),
+                Text(l10n.eachBoxNumbers),
                 const SizedBox(height: 16),
-                const Text(
-                  'Tips:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.tips,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                const Text('• Look for cells with only one possible number'),
-                const Text('• Use notes to track possible numbers'),
-                const Text('• Start with easier difficulties'),
-                const Text('• Practice regularly to improve'),
+                Text(l10n.lookForCells),
+                Text(l10n.useNotes),
+                Text(l10n.startEasier),
+                Text(l10n.practiceRegularly),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Got it!'),
+              child: Text(l10n.ok),
             ),
           ],
         );
@@ -181,30 +224,28 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showRateDialog(BuildContext context) {
+  void _showRateDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('⭐ Rate Sudoku Master'),
-          content: const Text(
-            'Are you enjoying Sudoku Master? Your feedback helps us improve the game!',
-          ),
+          title: Text('⭐ ${l10n.rateUs}'),
+          content: Text(l10n.enjoyingGame),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Maybe Later'),
+              child: Text(l10n.maybeLater),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Thank you for your support! 🎉'),
+                  SnackBar(
+                    content: Text(l10n.thankYou),
                   ),
                 );
               },
-              child: const Text('Rate Now'),
+              child: Text(l10n.rateNow),
             ),
           ],
         );

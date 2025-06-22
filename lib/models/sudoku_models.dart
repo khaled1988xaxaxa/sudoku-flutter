@@ -1,3 +1,5 @@
+import '../l10n/app_localizations.dart';
+
 class SudokuCell {
   int value;
   final bool isOriginal;
@@ -53,6 +55,25 @@ class SudokuMove {
 enum Difficulty { beginner, easy, medium, hard, expert, kidsBeginner, kidsEasy }
 
 extension DifficultyExtension on Difficulty {
+  String getDisplayName(AppLocalizations l10n) {
+    switch (this) {
+      case Difficulty.beginner:
+        return l10n.beginner;
+      case Difficulty.easy:
+        return l10n.easy;
+      case Difficulty.medium:
+        return l10n.medium;
+      case Difficulty.hard:
+        return l10n.hard;
+      case Difficulty.expert:
+        return l10n.expert;
+      case Difficulty.kidsBeginner:
+        return l10n.kidsBeginner;
+      case Difficulty.kidsEasy:
+        return l10n.kidsEasy;
+    }
+  }
+
   String get displayName {
     switch (this) {
       case Difficulty.beginner:

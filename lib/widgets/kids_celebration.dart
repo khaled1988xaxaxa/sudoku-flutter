@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+import '../l10n/app_localizations.dart';
 
 class KidsCelebration extends StatelessWidget {
   final String message;
@@ -19,6 +19,8 @@ class KidsCelebration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       child: Container(
@@ -72,47 +74,47 @@ class KidsCelebration extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildStatRow('⏱️ Time:', time),
+                  _buildStatRow(l10n.timeLabel, time),
                   const SizedBox(height: 8),
-                  _buildStatRow('💡 Hints Used:', hintsUsed.toString()),
+                  _buildStatRow('${l10n.hintsUsed}:', hintsUsed.toString()),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: onPlayAgain,
+                    onPressed: onGoHome,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF4CAF50),
+                      foregroundColor: const Color(0xFF4ECDC4),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text(
-                      '🎮 Play Again',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    child: Text(
+                      l10n.home,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: onGoHome,
+                    onPressed: onPlayAgain,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF4CAF50),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text(
-                      '🏠 Home',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    child: Text(
+                      l10n.playAgain,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

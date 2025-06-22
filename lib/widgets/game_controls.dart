@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/sudoku_models.dart';
+import '../l10n/app_localizations.dart';
 
 class GameControls extends StatelessWidget {
   final bool canUndo;
@@ -31,6 +32,7 @@ class GameControls extends StatelessWidget {
   Widget build(BuildContext context) {
     // Check if hints are available based on difficulty
     final bool hintsEnabled = difficulty != Difficulty.expert;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -40,33 +42,33 @@ class GameControls extends StatelessWidget {
           _buildControlButton(
             context,
             icon: Icons.undo,
-            label: 'Undo',
+            label: l10n.undo,
             onPressed: canUndo ? onUndo : null,
           ),
           _buildControlButton(
             context,
             icon: Icons.redo,
-            label: 'Redo',
+            label: l10n.redo,
             onPressed: canRedo ? onRedo : null,
           ),
           _buildControlButton(
             context,
             icon: noteMode ? Icons.edit : Icons.edit_outlined,
-            label: 'Notes',
+            label: l10n.notes,
             onPressed: onToggleNotes,
             isActive: noteMode,
           ),
           _buildControlButton(
             context,
             icon: Icons.lightbulb,
-            label: hintsEnabled ? 'Hint' : 'No Hints',
+            label: hintsEnabled ? l10n.hint : l10n.noHints,
             onPressed: hintsEnabled ? onHint : null,
             isDisabled: !hintsEnabled,
           ),
           _buildControlButton(
             context,
             icon: Icons.clear,
-            label: 'Clear',
+            label: l10n.clear,
             onPressed: onClear,
           ),
         ],

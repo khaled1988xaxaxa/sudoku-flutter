@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/sudoku_models.dart';
+import '../l10n/app_localizations.dart';
 
 class KidsNumberPad extends StatelessWidget {
-  final Function(int) onNumberTap;
+  final Function(int, [AppLocalizations?]) onNumberTap;
   final bool isGameActive;
   final Difficulty difficulty;
 
@@ -15,6 +16,7 @@ class KidsNumberPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Determine the maximum number based on difficulty
     final maxNumber = difficulty == Difficulty.kidsBeginner ? 4 : 9;
 
@@ -26,7 +28,7 @@ class KidsNumberPad extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             for (int i = 1; i <= maxNumber; i++) ...[
-              _buildKidsNumberButton(context, i),
+              _buildKidsNumberButton(context, i, l10n),
               if (i < maxNumber) const SizedBox(width: 10),
             ]
           ],
@@ -35,7 +37,7 @@ class KidsNumberPad extends StatelessWidget {
     );
   }
 
-  Widget _buildKidsNumberButton(BuildContext context, int number) {
+  Widget _buildKidsNumberButton(BuildContext context, int number, AppLocalizations l10n) {
     final colors = [
       const Color(0xFFFF6B6B), // Red
       const Color(0xFF4ECDC4), // Teal
@@ -49,7 +51,7 @@ class KidsNumberPad extends StatelessWidget {
     ];
 
     return GestureDetector(
-      onTap: isGameActive ? () => onNumberTap(number) : null,
+      onTap: isGameActive ? () => onNumberTap(number, l10n) : null,
       child: AnimatedContainer(
         width: 45,
         height: 45,

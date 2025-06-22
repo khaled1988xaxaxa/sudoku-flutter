@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/sudoku_models.dart';
-import '../utils/sudoku_generator.dart';
+import '../l10n/app_localizations.dart';
 
 class KidsProvider extends ChangeNotifier {
   List<List<SudokuCell>> _grid = [];
@@ -102,7 +102,7 @@ class KidsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void inputKidsNumber(int number) {
+  void inputKidsNumber(int number, [AppLocalizations? l10n]) {
     if (!_isGameActive || _selectedRow == -1 || _selectedCol == -1) {
       print("Cannot input number: game not active or no cell selected");
       return;
@@ -126,15 +126,15 @@ class KidsProvider extends ChangeNotifier {
       
       // Check if move is valid and give feedback
       if (_isValidKidsMove(_selectedRow, _selectedCol, number)) {
-        _encouragementMessage = _getPositiveFeedback();
+        _encouragementMessage = l10n != null ? _getPositiveFeedback(l10n) : _getPositiveFeedback();
         _showTemporaryMessage();
         
         // Check if game is complete
         if (_isKidsGridComplete()) {
-          _completeKidsGame();
+          _completeKidsGame(l10n);
         }
       } else {
-        _encouragementMessage = _getHelpfulHint();
+        _encouragementMessage = l10n != null ? _getHelpfulHint(l10n) : _getHelpfulHint();
         _showTemporaryMessage();
         // In kids mode, we don't mark it as error, just give a hint
       }
@@ -385,11 +385,11 @@ class KidsProvider extends ChangeNotifier {
     return true;
   }
 
-  void _completeKidsGame() {
+  void _completeKidsGame([AppLocalizations? l10n]) {
     _stopTimer();
     _isGameComplete = true;
     _isGameActive = false;
-    _encouragementMessage = _getCompletionMessage();
+    _encouragementMessage = l10n != null ? _getCompletionMessage(l10n) : _getCompletionMessage();
     _clearHighlights();
     notifyListeners();
   }
@@ -424,7 +424,7 @@ class KidsProvider extends ChangeNotifier {
   }
 
   // When checking hint cells, consider the grid size
-  void getKidsHint() {
+  void getKidsHint([AppLocalizations? l10n]) {
     if (!_isGameActive || _isGameComplete || _hintsRemaining <= 0) return;
 
     // Find the best cell to hint
@@ -465,26 +465,26 @@ class KidsProvider extends ChangeNotifier {
 
       // Check if game is complete after hint
       if (_isKidsGridComplete()) {
-        _completeKidsGame();
+        _completeKidsGame(l10n);
       }
 
       notifyListeners();
     }
   }
 
-  void clearKidsCell() {
+  void clearKidsCell([AppLocalizations? l10n]) {
     if (!_isGameActive || _selectedRow == -1 || _selectedCol == -1) return;
 
     SudokuCell cell = _grid[_selectedRow][_selectedCol];
     if (cell.isOriginal) return;
 
     cell.value = 0;
-    _encouragementMessage = 'Cell cleared! Try again! 🌟';
+    _encouragementMessage = l10n?.cellCleared ?? 'Cell cleared! Try again! 🌟';
     _showTemporaryMessage();
     notifyListeners();
   }
 
-  void resetKidsGame() {
+  void resetKidsGame([AppLocalizations? l10n]) {
     _grid = _deepCopyGrid(_originalGrid);
     _selectedRow = -1;
     _selectedCol = -1;
@@ -494,7 +494,7 @@ class KidsProvider extends ChangeNotifier {
     _isGameComplete = false;
     // Ensure game is active after reset
     _isGameActive = true;
-    _encouragementMessage = _getRandomEncouragement();
+    _encouragementMessage = l10n != null ? _getRandomEncouragement(l10n) : _getRandomEncouragement();
     _clearHighlights();
     _startTimer();
     
@@ -503,48 +503,92 @@ class KidsProvider extends ChangeNotifier {
   }
 
   // Messages and Timer
-  String _getRandomEncouragement() {
-    final messages = [
-      "Let's solve this puzzle together! 🌟",
-      "You're doing great! Keep going! 🎯",
-      "Every number has its perfect place! 🔢",
-      "Think like a detective! 🕵️",
-      "You're a puzzle master! 🧩",
-    ];
-    return messages[Random().nextInt(messages.length)];
+  String _getRandomEncouragement([AppLocalizations? l10n]) {
+    if (l10n != null) {
+      final messages = [
+        l10n.letsStart,
+        "You're doing great! Keep going! 🎯",
+        "Every number has its perfect place! 🔢",
+        "Think like a detective! 🕵️",
+        "You're a puzzle master! 🧩",
+      ];
+      return messages[Random().nextInt(messages.length)];
+    } else {
+      final messages = [
+        "Let's solve this puzzle together! 🌟",
+        "You're doing great! Keep going! 🎯",
+        "Every number has its perfect place! 🔢",
+        "Think like a detective! 🕵️",
+        "You're a puzzle master! 🧩",
+      ];
+      return messages[Random().nextInt(messages.length)];
+    }
   }
 
-  String _getPositiveFeedback() {
-    final messages = [
-      "Perfect! Well done! ⭐",
-      "Excellent choice! 🎉",
-      "You're on fire! 🔥",
-      "Brilliant move! 💫",
-      "Outstanding! 🌟",
-    ];
-    return messages[Random().nextInt(messages.length)];
+  String _getPositiveFeedback([AppLocalizations? l10n]) {
+    if (l10n != null) {
+      final messages = [
+        l10n.perfectWellDone,
+        l10n.excellentChoice,
+        l10n.youreOnFire,
+        l10n.brilliantMove,
+        l10n.outstanding,
+      ];
+      return messages[Random().nextInt(messages.length)];
+    } else {
+      final messages = [
+        "Perfect! Well done! ⭐",
+        "Excellent choice! 🎉",
+        "You're on fire! 🔥",
+        "Brilliant move! 💫",
+        "Outstanding! 🌟",
+      ];
+      return messages[Random().nextInt(messages.length)];
+    }
   }
 
-  String _getHelpfulHint() {
-    final messages = [
-      "Hmm, try a different number! 🤔",
-      "Check the row and column! 👀",
-      "Look at the box too! 📦",
-      "Think about what fits! 💭",
-      "You're so close! Try again! 🎯",
-    ];
-    return messages[Random().nextInt(messages.length)];
+  String _getHelpfulHint([AppLocalizations? l10n]) {
+    if (l10n != null) {
+      final messages = [
+        l10n.tryDifferentNumber,
+        l10n.checkRowColumn,
+        l10n.lookAtBox,
+        l10n.thinkWhatFits,
+        l10n.youreClose,
+      ];
+      return messages[Random().nextInt(messages.length)];
+    } else {
+      final messages = [
+        "Hmm, try a different number! 🤔",
+        "Check the row and column! 👀",
+        "Look at the box too! 📦",
+        "Think about what fits! 💭",
+        "You're so close! Try again! 🎯",
+      ];
+      return messages[Random().nextInt(messages.length)];
+    }
   }
 
-  String _getCompletionMessage() {
-    final messages = [
-      "🎉 AMAZING! You solved it! You're a Sudoku superstar! 🌟",
-      "🏆 FANTASTIC! Perfect puzzle solving! You rock! 🎸",
-      "🎊 WONDERFUL! You did it! Time to celebrate! 🎈",
-      "⭐ BRILLIANT! Outstanding work! You're incredible! 💎",
-      "🎯 PERFECT! Master puzzle solver! You're the best! 👑",
-    ];
-    return messages[Random().nextInt(messages.length)];
+  String _getCompletionMessage([AppLocalizations? l10n]) {
+    if (l10n != null) {
+      final messages = [
+        l10n.amazingSolved,
+        l10n.fantasticPerfect,
+        l10n.wonderfulDidIt,
+        l10n.brilliantOutstanding,
+        l10n.perfectMaster,
+      ];
+      return messages[Random().nextInt(messages.length)];
+    } else {
+      final messages = [
+        "🎉 AMAZING! You solved it! You're a Sudoku superstar! 🌟",
+        "🏆 FANTASTIC! Perfect puzzle solving! You rock! 🎸",
+        "🎊 WONDERFUL! You did it! Time to celebrate! 🎈",
+        "⭐ BRILLIANT! Outstanding work! You're incredible! 💎",
+        "🎯 PERFECT! Master puzzle solver! You're the best! 👑",
+      ];
+      return messages[Random().nextInt(messages.length)];
+    }
   }
 
   void _showTemporaryMessage() {

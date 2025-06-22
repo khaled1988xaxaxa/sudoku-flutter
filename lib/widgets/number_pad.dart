@@ -1,48 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/sudoku_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/text_utils.dart';
 
 class NumberPad extends StatelessWidget {
   final Function(int) onNumberTap;
-  final bool isGameActive;
+  final VoidCallback onToggleNotes;
   final bool noteMode;
+  final bool isGameActive;
 
   const NumberPad({
     super.key,
     required this.onNumberTap,
-    required this.isGameActive,
+    required this.onToggleNotes,
     required this.noteMode,
+    required this.isGameActive,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.all(4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (noteMode)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+          // Note mode toggle button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isGameActive ? onToggleNotes : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: noteMode
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).colorScheme.surface,
+                foregroundColor: noteMode
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface,
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.edit, size: 16, color: Theme.of(context).primaryColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Note Mode',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Icon(noteMode ? Icons.edit : Icons.edit_outlined),
+                  const SizedBox(width: 8),
+                  Text(l10n.noteMode),
                 ],
               ),
             ),
+          ),
           const SizedBox(height: 8),
           // First row with numbers 1-5
           Row(
@@ -91,12 +98,13 @@ class NumberPad extends StatelessWidget {
               elevation: 1,
               padding: EdgeInsets.zero,
             ),
-            child: Text(
-              number.toString(),
-              style: const TextStyle(
-                fontSize: 22, // Larger font size
-                fontWeight: FontWeight.bold,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: PaintedNumberWidget(
+                number: number,
                 color: Colors.white,
+                size: 22.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -112,12 +120,18 @@ class NumberPad extends StatelessWidget {
                     : Colors.white.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                '$count', // Just showing the count without the maximum
-                style: TextStyle(
-                  fontSize: 8,
-                  fontWeight: FontWeight.bold,
-                  color: count >= maxCount ? Colors.white : Colors.black,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: count >= maxCount ? Colors.white : Colors.black,
+                    fontFamily: 'Roboto',
+                    locale: const Locale('en', 'US'),
+                  ),
+                  textDirection: TextDirection.ltr,
                 ),
               ),
             ),

@@ -20,36 +20,40 @@ class SudokuGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.0,
-      child: Container(
-        margin: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.black, width: 2), // Thinner black border
-          borderRadius: BorderRadius.circular(8), // Smaller border radius to match image
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 5,
-              offset: const Offset(0, 3),
+    // Force grid layout LTR to avoid mirroring in RTL locales like Arabic
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: AspectRatio(
+        aspectRatio: 1.0,
+        child: Container(
+          margin: const EdgeInsets.all(8), // Increased margin for smaller grid
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.black, width: 2),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Column(
+              children: List.generate(9, (row) {
+                return Expanded(
+                  child: Row(
+                    children: List.generate(9, (col) {
+                      return Expanded(
+                        child: _buildCell(context, row, col),
+                      );
+                    }),
+                  ),
+                );
+              }),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Column(
-            children: List.generate(9, (row) {
-              return Expanded(
-                child: Row(
-                  children: List.generate(9, (col) {
-                    return Expanded(
-                      child: _buildCell(context, row, col),
-                    );
-                  }),
-                ),
-              );
-            }),
           ),
         ),
       ),
@@ -97,17 +101,15 @@ class SudokuGrid extends StatelessWidget {
         ),
         child: Center(
           child: cell.value != 0
-              ? SudokuNumberText(
+              ? PaintedNumberWidget(
                   number: cell.value,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: cell.isOriginal ? FontWeight.bold : FontWeight.normal,
-                    color: isConflict 
-                        ? Colors.red  // Red text for conflicting cells
-                        : cell.isOriginal 
-                            ? Colors.black 
-                            : Theme.of(context).primaryColor,
-                  ),
+                  color: isConflict 
+                      ? Colors.red
+                      : cell.isOriginal 
+                          ? Colors.black87
+                          : Theme.of(context).primaryColor,
+                  size: 18.0,
+                  fontWeight: cell.isOriginal ? FontWeight.bold : FontWeight.normal,
                 )
               : cell.notes.isNotEmpty
                   ? _buildNotes(context, cell.notes)
@@ -132,11 +134,17 @@ class SudokuGrid extends StatelessWidget {
         
         return Center(
           child: hasNote
-              ? Text(
-                  number.toString(),
-                  style: TextStyle(
-                    fontSize: 8,
-                    color: Colors.grey[600],
+              ? Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    number.toString(),
+                    style: TextStyle(
+                      fontSize: 8,
+                      color: Colors.grey[600],
+                      fontFamily: 'monospace',
+                      locale: const Locale('en', 'US'),
+                    ),
+                    textDirection: TextDirection.ltr,
                   ),
                 )
               : null,

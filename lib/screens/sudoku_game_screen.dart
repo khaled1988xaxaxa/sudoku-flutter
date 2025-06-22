@@ -6,7 +6,6 @@ import '../models/sudoku_models.dart';
 import '../widgets/sudoku_grid.dart';
 import '../widgets/number_pad.dart';
 import '../widgets/game_controls.dart';
-import '../widgets/completion_dialog.dart';
 
 class SudokuGameScreen extends StatefulWidget {
   const SudokuGameScreen({super.key});
@@ -122,8 +121,9 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: NumberPad(
                   onNumberTap: sudokuProvider.inputNumber,
-                  isGameActive: sudokuProvider.isGameActive,
+                  onToggleNotes: sudokuProvider.toggleNoteMode,
                   noteMode: sudokuProvider.noteMode,
+                  isGameActive: sudokuProvider.isGameActive,
                 ),
               ),
 

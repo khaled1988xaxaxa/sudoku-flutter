@@ -7,6 +7,7 @@ import '../models/sudoku_models.dart';
 import '../widgets/kids_sudoku_grid.dart';
 import '../widgets/kids_number_pad.dart';
 import '../widgets/kids_celebration.dart';
+import '../l10n/app_localizations.dart';
 
 class KidsGameScreen extends StatefulWidget {
   const KidsGameScreen({super.key});
@@ -47,6 +48,8 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Consumer2<KidsProvider, StatisticsProvider>(
       builder: (context, kidsProvider, statsProvider, child) {
         // Show celebration when game is complete and dialog hasn't been shown yet
@@ -77,13 +80,12 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
                 SafeArea(
                   child: Column(
                     children: [
-                      _buildKidsHeader(context, kidsProvider),
-                      // Remove the encouragement message from here to prevent layout shifts
-                      _buildKidsInfoBar(context, kidsProvider),
+                      _buildKidsHeader(context, kidsProvider, l10n),
+                      _buildKidsInfoBar(context, kidsProvider, l10n),
                       Expanded(
-                        flex: 5, // Increased from 3 to 5 for much larger grid
+                        flex: 5,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reduced padding
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           child: KidsSudokuGrid(
                             grid: kidsProvider.grid,
                             selectedRow: kidsProvider.selectedRow,
@@ -93,9 +95,9 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
                           ),
                         ),
                       ),
-                      _buildKidsControls(context, kidsProvider, statsProvider),
+                      _buildKidsControls(context, kidsProvider, statsProvider, l10n),
                       Expanded(
-                        flex: 1, // Reduced from 2 to 1 to give more space to the grid
+                        flex: 1,
                         child: KidsNumberPad(
                           onNumberTap: kidsProvider.inputKidsNumber,
                           isGameActive: kidsProvider.isGameActive,
@@ -162,7 +164,7 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
     );
   }
 
-  Widget _buildKidsHeader(BuildContext context, KidsProvider provider) {
+  Widget _buildKidsHeader(BuildContext context, KidsProvider provider, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -183,7 +185,7 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
             ),
           ),
           IconButton(
-            onPressed: () => _showKidsRestartDialog(context, provider),
+            onPressed: () => _showKidsRestartDialog(context, provider, l10n),
             icon: const Icon(Icons.refresh, color: Colors.white, size: 28),
           ),
         ],
@@ -191,7 +193,7 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
     );
   }
 
-  Widget _buildKidsInfoBar(BuildContext context, KidsProvider provider) {
+  Widget _buildKidsInfoBar(BuildContext context, KidsProvider provider, AppLocalizations l10n) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -205,17 +207,17 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
         children: [
           _buildKidsInfoItem(
             icon: Icons.timer,
-            label: 'Time',
+            label: l10n.time,
             value: provider.formattedTime,
           ),
           _buildKidsInfoItem(
             icon: Icons.lightbulb,
-            label: 'Hints Left',
+            label: l10n.hintsLeft,
             value: provider.hintsRemaining.toString(),
           ),
           _buildKidsInfoItem(
             icon: Icons.star,
-            label: 'Level',
+            label: l10n.level,
             value: difficulty == Difficulty.kidsBeginner ? '1' : '2',
           ),
         ],
@@ -251,7 +253,7 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
     );
   }
 
-  Widget _buildKidsControls(BuildContext context, KidsProvider provider, StatisticsProvider statsProvider) {
+  Widget _buildKidsControls(BuildContext context, KidsProvider provider, StatisticsProvider statsProvider, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -259,24 +261,24 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
         children: [
           _buildKidsControlButton(
             icon: Icons.lightbulb,
-            label: 'Hint',
+            label: l10n.hint,
             color: const Color(0xFFFFEB3B),
             onTap: provider.hintsRemaining > 0 ? () {
-              provider.getKidsHint();
+              provider.getKidsHint(l10n);
               statsProvider.recordHintUsed();
             } : null,
           ),
           _buildKidsControlButton(
             icon: Icons.clear,
-            label: 'Clear',
+            label: l10n.clear,
             color: const Color(0xFFFF6B6B),
-            onTap: provider.clearKidsCell,
+            onTap: () => provider.clearKidsCell(l10n),
           ),
           _buildKidsControlButton(
             icon: Icons.refresh,
-            label: 'Reset',
+            label: l10n.restart,
             color: const Color(0xFF4ECDC4),
-            onTap: () => _showKidsRestartDialog(context, provider),
+            onTap: () => _showKidsRestartDialog(context, provider, l10n),
           ),
         ],
       ),
@@ -324,6 +326,8 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
   }
 
   void _showCompletionDialog(BuildContext context, KidsProvider provider, StatisticsProvider statsProvider) {
+    final l10n = AppLocalizations.of(context);
+    
     // Record the completion
     statsProvider.recordGame(
       difficulty: provider.currentDifficulty,
@@ -345,7 +349,7 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
             Navigator.pop(context);
             provider.startNewKidsGame(difficulty);
             setState(() {
-              _hasShownCompletionDialog = false; // Reset flag when starting a new game
+              _hasShownCompletionDialog = false;
             });
           },
           onGoHome: () {
@@ -357,25 +361,25 @@ class _KidsGameScreenState extends State<KidsGameScreen> {
     );
   }
 
-  void _showKidsRestartDialog(BuildContext context, KidsProvider provider) {
+  void _showKidsRestartDialog(BuildContext context, KidsProvider provider, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('🔄 Start Over?'),
-          content: const Text('Do you want to start a new puzzle? Your current progress will be lost.'),
+          title: Text('🔄 ${l10n.startOver}?'),
+          content: Text(l10n.restartGameMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Keep Playing'),
+              child: Text(l10n.keepPlaying),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 provider.resetKidsGame();
               },
-              child: const Text('Start Over'),
+              child: Text(l10n.startOver),
             ),
           ],
         );

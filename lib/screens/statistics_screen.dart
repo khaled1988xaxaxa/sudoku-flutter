@@ -3,19 +3,22 @@ import 'package:provider/provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../providers/statistics_provider.dart';
 import '../models/sudoku_models.dart';
+import '../l10n/app_localizations.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('📊 Statistics'),
+        title: Text('📊 ${l10n.statistics}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => _showResetDialog(context),
+            onPressed: () => _showResetDialog(context, l10n),
           ),
         ],
       ),
@@ -26,13 +29,13 @@ class StatisticsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildOverviewCards(context, stats),
+                _buildOverviewCards(context, stats, l10n),
                 const SizedBox(height: 24),
-                _buildDifficultyStats(context, stats),
+                _buildDifficultyStats(context, stats, l10n),
                 const SizedBox(height: 24),
-                _buildAchievements(context, stats),
+                _buildAchievements(context, stats, l10n),
                 const SizedBox(height: 24),
-                _buildRecentGames(context, stats),
+                _buildRecentGames(context, stats, l10n),
                 const SizedBox(height: 80), // Bottom padding
               ],
             ),
@@ -42,7 +45,7 @@ class StatisticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOverviewCards(BuildContext context, StatisticsProvider stats) {
+  Widget _buildOverviewCards(BuildContext context, StatisticsProvider stats, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 0,
       duration: const Duration(milliseconds: 600),
@@ -65,7 +68,7 @@ class StatisticsScreen extends StatelessWidget {
                     child: _buildStatCard(
                       context,
                       icon: Icons.games,
-                      title: 'Total Games',
+                      title: l10n.totalGames,
                       value: stats.totalGames.toString(),
                       color: Colors.blue,
                     ),
@@ -75,7 +78,7 @@ class StatisticsScreen extends StatelessWidget {
                     child: _buildStatCard(
                       context,
                       icon: Icons.emoji_events,
-                      title: 'Games Won',
+                      title: l10n.gamesWon,
                       value: stats.gamesWon.toString(),
                       color: Colors.green,
                     ),
@@ -89,7 +92,7 @@ class StatisticsScreen extends StatelessWidget {
                     child: _buildStatCard(
                       context,
                       icon: Icons.local_fire_department,
-                      title: 'Current Streak',
+                      title: l10n.streak,
                       value: stats.currentStreak.toString(),
                       color: Colors.orange,
                     ),
@@ -99,7 +102,7 @@ class StatisticsScreen extends StatelessWidget {
                     child: _buildStatCard(
                       context,
                       icon: Icons.timer,
-                      title: 'Best Time',
+                      title: l10n.bestTime,
                       value: stats.formattedBestTime,
                       color: Colors.purple,
                     ),
@@ -113,7 +116,7 @@ class StatisticsScreen extends StatelessWidget {
                     child: _buildStatCard(
                       context,
                       icon: Icons.percent,
-                      title: 'Win Rate',
+                      title: l10n.winRate,
                       value: '${stats.winRate.toStringAsFixed(1)}%',
                       color: Colors.teal,
                     ),
@@ -179,7 +182,7 @@ class StatisticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDifficultyStats(BuildContext context, StatisticsProvider stats) {
+  Widget _buildDifficultyStats(BuildContext context, StatisticsProvider stats, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 1,
       duration: const Duration(milliseconds: 600),
@@ -193,7 +196,7 @@ class StatisticsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Performance by Difficulty',
+                    l10n.performanceByDifficulty,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -253,7 +256,7 @@ class StatisticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAchievements(BuildContext context, StatisticsProvider stats) {
+  Widget _buildAchievements(BuildContext context, StatisticsProvider stats, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 2,
       duration: const Duration(milliseconds: 600),
@@ -345,7 +348,7 @@ class StatisticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentGames(BuildContext context, StatisticsProvider stats) {
+  Widget _buildRecentGames(BuildContext context, StatisticsProvider stats, AppLocalizations l10n) {
     return AnimationConfiguration.staggeredList(
       position: 3,
       duration: const Duration(milliseconds: 600),
@@ -466,27 +469,27 @@ class StatisticsScreen extends StatelessWidget {
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void _showResetDialog(BuildContext context) {
+  void _showResetDialog(BuildContext context, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Reset Statistics'),
-          content: const Text('Are you sure you want to reset all statistics? This action cannot be undone.'),
+          title: Text(l10n.resetStatistics),
+          content: Text(l10n.resetStatisticsMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 Provider.of<StatisticsProvider>(context, listen: false).resetStatistics();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Statistics reset successfully')),
+                  SnackBar(content: Text(l10n.statisticsResetSuccess)),
                 );
               },
-              child: const Text('Reset', style: TextStyle(color: Colors.red)),
+              child: Text(l10n.restart, style: const TextStyle(color: Colors.red)),
             ),
           ],
         );

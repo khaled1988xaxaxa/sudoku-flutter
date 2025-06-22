@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
-import 'dart:ui' as ui;
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'providers/theme_provider.dart';
 import 'providers/sudoku_provider.dart';
 import 'providers/kids_provider.dart';
 import 'providers/statistics_provider.dart';
+import 'providers/language_provider.dart';
 import 'screens/custom_home_screen.dart'; // Use custom screen instead
 import 'screens/sudoku_game_screen.dart';
 import 'screens/kids_game_screen.dart';
 import 'screens/statistics_screen.dart';
 import 'screens/settings_screen.dart';
 import 'utils/app_theme.dart';
-import 'widgets/completion_dialog.dart';
+import 'l10n/app_localizations.dart';
 
 // Create a global navigator key for accessing context from providers
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -43,12 +43,24 @@ class SudokuApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SudokuProvider()),
         ChangeNotifierProvider(create: (_) => KidsProvider()),
         ChangeNotifierProvider(create: (_) => StatisticsProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: Consumer2<ThemeProvider, LanguageProvider>(
+        builder: (context, themeProvider, languageProvider, child) {
           return MaterialApp(
             title: 'Sudoku Master',
             debugShowCheckedModeBanner: false,
+            
+            // Localization configuration
+            locale: languageProvider.currentLocale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            
             theme: AppTheme.lightTheme.copyWith(
               // Explicitly set text theme to use Roboto font
               textTheme: AppTheme.lightTheme.textTheme.apply(
@@ -64,19 +76,9 @@ class SudokuApp extends StatelessWidget {
               ),
             ),
             themeMode: themeProvider.themeMode,
-            locale: const Locale('en', 'US'),
-            localizationsDelegates: const [
-              DefaultMaterialLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-              DefaultCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en', 'US'),
-            ],
             navigatorKey: navigatorKey,
-            initialRoute: '/',
+            home: const CustomHomeScreen(),
             routes: {
-              '/': (context) => const CustomHomeScreen(), // Use custom home screen
               '/sudoku': (context) => const SudokuGameScreen(),
               '/kids': (context) => const KidsGameScreen(),
               '/statistics': (context) => const StatisticsScreen(),
