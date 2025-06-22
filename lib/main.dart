@@ -9,6 +9,7 @@ import 'providers/sudoku_provider.dart';
 import 'providers/kids_provider.dart';
 import 'providers/statistics_provider.dart';
 import 'providers/language_provider.dart';
+import 'screens/splash_screen.dart'; // Add splash screen import
 import 'screens/custom_home_screen.dart'; // Use custom screen instead
 import 'screens/sudoku_game_screen.dart';
 import 'screens/kids_game_screen.dart';
@@ -77,8 +78,9 @@ class SudokuApp extends StatelessWidget {
             ),
             themeMode: themeProvider.themeMode,
             navigatorKey: navigatorKey,
-            home: const CustomHomeScreen(),
+            home: const SplashScreen(), // Changed from CustomHomeScreen to SplashScreen
             routes: {
+              '/home': (context) => const CustomHomeScreen(), // Add home route
               '/sudoku': (context) => const SudokuGameScreen(),
               '/kids': (context) => const KidsGameScreen(),
               '/statistics': (context) => const StatisticsScreen(),
